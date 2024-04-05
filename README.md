@@ -44,7 +44,7 @@ const db = FrogDB().generate([UserSchema, PostSchema]);
 
 ```typescript
 async function createUser() {
-  const newUser = await db.User.insert({
+  const newUser = await UserSchema.insert({
     username: "froggy123",
     age: 25,
     isActive: true,

@@ -1,6 +1,9 @@
 {
   "name": "frogdb",
+  "description": "🐸 Lightweight, adaptable JSON database",
+  "version": "0.1.0",
   "module": "index.ts",
+  "main": "lib/index.js",
   "type": "module",
   "devDependencies": {
     "@types/bun": "latest"

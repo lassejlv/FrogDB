@@ -18,9 +18,9 @@ Currently, FrogDB is intended to be integrated directly into your project. Clone
 1. **Define Your Schemas**: Create schemas for your data models. Each schema should have a name and an array of fields.
 
 ```typescript
-import { FrogSchema, FrogFieldType } from "./types";
+import { Schema, FrogFieldType } from "frogdb";
 
-const UserSchema: FrogSchema = {
+const UserSchema = await Schema({
   name: "User",
   fields: [
     { name: "username", type: FrogFieldType.String, required: true },
@@ -33,7 +33,7 @@ const UserSchema: FrogSchema = {
 2. **Initialize FrogDB**: Set up FrogDB with your schemas.
 
 ```typescript
-import FrogDB from "./FrogDB";
+import FrogDB from "frogdb";
 import { UserSchema } from "./schemas/User";
 import { PostSchema } from "./schemas/Post";
 

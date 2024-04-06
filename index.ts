@@ -1,10 +1,7 @@
-import { PostSchema } from "./schemas/Post";
-import { UserSchema } from "./schemas/User";
-import type { FrogSchema } from "./types";
+import { type FrogSchema, type FrogField, FrogFieldType } from "./types";
 import crypto from "crypto";
 import fs from "fs";
 
-const schemaPath = "./db";
 
 function CreateDocumentId() {
   return crypto.randomUUID();
@@ -32,6 +29,7 @@ export async function Schema(data: FrogSchema) {
       }
 
       if (found) {
+         // @ts-ignore
         results.push(obj);
       }
     }
@@ -149,7 +147,7 @@ export async function Schema(data: FrogSchema) {
   }
 }
 
-function FrogDB() {
+export function FrogDB() {
   let path = "./db";
   return {
     async generate(schemas: FrogSchema[]) {
@@ -178,8 +176,5 @@ function FrogDB() {
   };
 }
 
-const db = FrogDB().generate([UserSchema, PostSchema]);
-
-const user = await UserSchema.deleteOne("a36ecbfb-5b7f-41f8-b30b-677eb0566ba7");
-
-console.log(user);
+export { FrogFieldType }
+export type { FrogSchema, FrogField };

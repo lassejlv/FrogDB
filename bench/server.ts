@@ -12,5 +12,4 @@ const app = new ProBun({
     logger: true
 })
 
-
 app.start()

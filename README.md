@@ -8,6 +8,7 @@ FrogDB is a lightweight, file-based JSON database system designed for local deve
 - **CRUD Operations**: Full support for create, read, update, and delete operations.
 - **Local Storage**: All data is stored locally in JSON files, making it easy to inspect and manage.
 - **Type Checking**: Ensures data integrity with basic type checking for string, number, and boolean fields.
+- **Fast**: It can handle up to 32,000 thousand of write operations per second.
 
 ## Installation
 

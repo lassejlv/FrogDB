@@ -29,7 +29,6 @@ export async function Schema(data: FrogSchema) {
       }
 
       if (found) {
-         // @ts-ignore
         results.push(obj);
       }
     }
@@ -46,12 +45,16 @@ export async function Schema(data: FrogSchema) {
       ...document,
     };
 
-    // Check if there are fields that are not in the schema
+    // Check if there are fields that are not in the schema or if a field is missing
     for (const key in constructedDocument) {
       if (key === "id") continue;
 
       if (!data.fields.find((field) => field.name === key)) {
         throw new Error(`Field ${key} is not in the schema`);
+      }
+
+      if (data.fields.find((field) => field.name === key && field.required) && !constructedDocument[key]) {
+        throw new Error(`Field ${key} is required`);
       }
     }
 

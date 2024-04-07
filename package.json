@@ -1,7 +1,7 @@
 {
   "name": "frogdb",
   "description": "🐸 Lightweight, adaptable JSON database",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "module": "index.ts",
   "main": "lib/index.js",
   "type": "module",
@@ -9,7 +9,8 @@
     "build": "bun build.ts"
   },
   "devDependencies": {
-    "@types/bun": "latest"
+    "@types/bun": "latest",
+    "probun": "^0.1.8"
   },
   "peerDependencies": {
     "typescript": "^5.0.0"

@@ -5,6 +5,9 @@
   "module": "index.ts",
   "main": "lib/index.js",
   "type": "module",
+  "scripts": {
+    "build": "bun build.ts"
+  },
   "devDependencies": {
     "@types/bun": "latest"
   },

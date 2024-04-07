@@ -16,5 +16,9 @@ export const UserSchema = await Schema({
         name: "isStudent",
         type: FrogFieldType.Boolean,
       },
+      {
+        name: "isAdmin",
+        type: FrogFieldType.Boolean,
+      },
     ],
 })

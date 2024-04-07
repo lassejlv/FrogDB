@@ -1,4 +1,5 @@
 import { type FrogSchema, type FrogField, FrogFieldType } from "./types";
+import { formatType } from "./helpers/format";
 export declare function Schema(data: FrogSchema): Promise<{
     find: (query: any) => Promise<any[]>;
     insert: (document: any) => Promise<any>;
@@ -12,5 +13,5 @@ export declare function Schema(data: FrogSchema): Promise<{
 export declare function FrogDB(): {
     generate(schemas: FrogSchema[]): Promise<any>;
 };
-export { FrogFieldType };
+export { FrogFieldType, formatType };
 export type { FrogSchema, FrogField };

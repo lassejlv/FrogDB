@@ -1,6 +1,7 @@
 import { type FrogSchema, type FrogField, FrogFieldType } from "./types";
 import crypto from "crypto";
 import fs from "fs";
+import { formatType } from "./helpers/format";
 
 
 function CreateDocumentId() {
@@ -170,6 +171,33 @@ export function FrogDB() {
           throw new Error("Schema cannot have a field named 'id'");
         }
 
+        // Check if there are duplicate fields
+        const fieldNames = schema.fields.map((field) => field.name);
+        const uniqueFieldNames = new Set(fieldNames);
+
+        // Check if fields are unique
+        if (fieldNames.length !== uniqueFieldNames.size) {
+          throw new Error("Fields must be unique");
+        }
+
+        // Create types for the schema
+        const types: string[] = [];
+    
+        // Push the fields to the types array
+        for (const field of schema.fields) {
+          types.push(`${field.name}: ${formatType(field)};`);
+        }
+
+        // Check if the types folder exists, if not create it
+        if (!fs.existsSync(`${path}/types`)) {
+          fs.mkdirSync(`${path}/types`);
+        }
+
+        // Create the types file
+        const typesPath = `${path}/types/${schema.name}.ts`;
+        fs.writeFileSync(typesPath, `export type ${schema.name} = { ${types.join(" ")} };`);
+
+        // Create the schema file
         if (!fs.existsSync(schemaPath)) {
           fs.mkdirSync(schemaPath);
         } 
@@ -179,5 +207,5 @@ export function FrogDB() {
   };
 }
 
-export { FrogFieldType }
+export { FrogFieldType, formatType }
 export type { FrogSchema, FrogField };

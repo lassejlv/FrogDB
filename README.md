@@ -1,6 +1,6 @@
-# FrogDB: 🐸 Lightweight, adaptable JSON database
+## 🐸 Lightweight, adaptable JSON database
 
-FrogDB is a lightweight, file-based JSON database system designed for local development and small-scale applications. It allows for quick setup and easy data manipulation with the flexibility of JSON. Inspired by the adaptability of frogs, FrogDB supports dynamic schemas to fit various data structures, making it a versatile choice for developers.
+FrogDB is a lightweight, file-based JSON database system designed for local development and small-scale applications. It allows for quick setup and easy data manipulation with the flexibility of JSON.
 
 ## Features
 
@@ -13,7 +13,11 @@ FrogDB is a lightweight, file-based JSON database system designed for local deve
 
 ## Installation
 
-Currently, FrogDB is intended to be integrated directly into your project. Clone the repository into your project directory to get started.
+```bash
+bun add frogdb
+```
+
+*frogdb is only supported within the [bun rumetime](https://bun.sh)*
 
 ## Quick Start
 
@@ -39,7 +43,8 @@ import FrogDB from "frogdb";
 import { UserSchema } from "./schemas/User";
 import { PostSchema } from "./schemas/Post";
 
-const db = FrogDB().generate([UserSchema, PostSchema]);
+// This will create a new folder called `db` in your project root, with a "types" folder containing the generated types.
+FrogDB().generate([UserSchema, PostSchema]);
 ```
 
 3. **Perform Operations**: Use the provided async functions to interact with your database.
@@ -68,6 +73,31 @@ Each schema requires a `name` and an array of `fields`. Fields must specify a `n
 - **deleteOne(id: string)**: Deletes the document with the specified `id`. Returns the deleted document.
 - **deleteAll(query: any)**: Deletes all documents matching the query. Returns an array of deleted documents.
 - **update(id: string, document: any)**: Updates the document with the specified `id`. Returns the updated document.
+
+## Type Safety
+
+Simply import the generated types from the `types` folder to get type safety and intellisense support.
+
+```typescript
+import { UserSchema } from "./schemas/User";
+import { User } from "./db/types/User";
+
+async function createUser() {
+  const newUser: User = await UserSchema.insert({
+    username: "froggy123",
+    age: 25,
+    isActive: true,
+  });
+
+ // or
+
+  const newUser = await UserSchema.findOne<User>({
+    username: "frog" // expected string
+  });
+
+  user.age = "25"; // error
+}
+```
 
 ## Contributing
 

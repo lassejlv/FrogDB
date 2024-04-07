@@ -10,12 +10,12 @@ function CreateDocumentId() {
 
 export async function Schema(data: FrogSchema) {
 
-  const find = async (query: any): Promise<any[]> => {
+  const find = async <T>(query: any): Promise<T> => {
     // Your implementation here...
     const schemaPath = `./db/${data.name}`;
     const files = fs.readdirSync(schemaPath).filter(file => file.endsWith(".json"));
 
-    const results = [];
+    const results = []
 
     for (const file of files) {
       const content = fs.readFileSync(`${schemaPath}/${file}`, "utf-8");
@@ -30,14 +30,15 @@ export async function Schema(data: FrogSchema) {
       }
 
       if (found) {
-        results.push(obj);
+        results.push(obj)
       }
     }
 
-    return results;
+    // Return the results
+    return results as any
   };
 
-  const insert = async (document: any) => {
+  const insert = async <T>(document: any): Promise<T> => {
     const id = CreateDocumentId();
     const schemaPath = `./db/${data.name}`;    
 
@@ -74,9 +75,10 @@ export async function Schema(data: FrogSchema) {
     return constructedDocument;
   }
 
-  const findOne = async (query: any) => {
+  const findOne = async <T>(query: any): Promise<T> => {
     const results = await find(query);
-    return results[0];
+    // @ts-ignore
+    return results[0] as T;
   }
 
   const deleteOne = async (id: string) => {
@@ -93,17 +95,17 @@ export async function Schema(data: FrogSchema) {
     return exist;
   }
 
-  const deleteAll = async (query: any) => {
+  const deleteAll = async <T>(query: any): Promise<T[]> => {
     const results = await find(query);
 
-    for (const result of results) {
+    for (const result of results as any[]) {
       await deleteOne(result.id);
     }
 
-    return results;
+    return results as T[];
   }
 
-  const update = async (id: string, document: any) => {
+  const update = async <T>(id: string, document: any): Promise<T> => {
     const exist = await findOne({ id });
     if (!exist) {
       throw new Error("Document not found");

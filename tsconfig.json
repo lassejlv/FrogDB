@@ -42,5 +42,6 @@
     "src/schemas",
     "lib",
     "build.ts",
+    "src/usage.ts"
   ]
 }

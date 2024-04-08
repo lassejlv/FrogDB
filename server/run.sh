@@ -1,1 +1,0 @@
-nodemon --exec "clear && go run" ./main.go --signal SIGTERM -q

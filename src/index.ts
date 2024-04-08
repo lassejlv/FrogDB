@@ -197,7 +197,7 @@ export function FrogDB() {
 
         // Create the types file
         const typesPath = `${path}/types/${schema.name}.ts`;
-        fs.writeFileSync(typesPath, `export type ${schema.name} = { ${types.join(" ")} };`);
+        fs.writeFileSync(typesPath, `export type ${schema.name} = { id: string; ${types.join(" ")} };`);
 
         // Create the schema file
         if (!fs.existsSync(schemaPath)) {

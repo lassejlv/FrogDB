@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
@@ -10,14 +11,9 @@ import (
 	"github.com/joho/godotenv"
 )
 
-// const (
-// 	STRING  = "string"
-// 	NUMBER  = "number"
-// 	BOOLEAN = "boolean"
-// 	OBJECT  = "object"
-// 	ARRAY   = "array"
-// 	NULL    = "null"
-// )
+const (
+	SCHEMA_CREATE = "SCHEMA_CREATE"
+)
 
 var upgrader = websocket.Upgrader{
 	ReadBufferSize:  1024,
@@ -59,8 +55,45 @@ func websocketHandler(w http.ResponseWriter, r *http.Request) {
 			log.Println(err)
 			break
 		}
-		// show message
-		log.Printf("Received message: %s", message)
+
+		// get "type" and "data" from message as JSON
+		var msg map[string]interface{}
+
+		err = json.Unmarshal(message, &msg)
+		if err != nil {
+			log.Println(err)
+			break
+		}
+
+		// get "type" and "data" from message
+		msgType := msg["type"].(string)
+		msgRequestId := msg["requestId"].(string)
+		// msgData := msg["data"]
+
+		switch msgType {
+		case SCHEMA_CREATE:
+			log.Println("Schema Create")
+			// Return response to client with a json object
+			obj := map[string]interface{}{
+				"requestId": msgRequestId,
+				"status":    "success",
+				"message":   "Schema Created",
+			}
+
+			// Convert object to JSON
+			jsonObj, err := json.Marshal(obj)
+
+			if err != nil {
+				log.Println(err)
+				break
+			}
+
+			// Send JSON to client
+			conn.WriteMessage(websocket.TextMessage, jsonObj)
+
+		default:
+			conn.WriteMessage(websocket.TextMessage, []byte("INVALID_MESSAGE_TYPE"))
+		}
 
 		//send message to client
 		err = conn.WriteMessage(websocket.TextMessage, []byte("Hello Client"))
@@ -78,9 +111,6 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-
-	// var dbUser = os.Getenv("DB_USER")
-	// var dbPass = os.Getenv("DB_PASS")
 
 	http.HandleFunc("/", websocketHandler)
 	log.Println("Listen on :8080")

@@ -14,4 +14,7 @@ export enum FrogFieldType {
   String = "string",
   Number = "number",
   Boolean = "boolean",
+  Date = "date",
+  Object = "object",
+  Array = "array",
 }

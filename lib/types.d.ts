@@ -11,5 +11,8 @@ export interface FrogField {
 export declare enum FrogFieldType {
     String = "string",
     Number = "number",
-    Boolean = "boolean"
+    Boolean = "boolean",
+    Date = "date",
+    Object = "object",
+    Array = "array"
 }

@@ -3,19 +3,19 @@ import crypto from "crypto";
 import fs from "fs";
 import { formatType } from "./helpers/format";
 
-
 function CreateDocumentId() {
-  return crypto.randomUUID();
+  return crypto.randomBytes(16).toString("hex");
 }
 
 export async function Schema(data: FrogSchema) {
-
   const find = async <T>(query: any): Promise<T> => {
     // Your implementation here...
     const schemaPath = `./db/${data.name}`;
-    const files = fs.readdirSync(schemaPath).filter(file => file.endsWith(".json"));
+    const files = fs
+      .readdirSync(schemaPath)
+      .filter((file) => file.endsWith(".json"));
 
-    const results = []
+    const results = [];
 
     for (const file of files) {
       const content = fs.readFileSync(`${schemaPath}/${file}`, "utf-8");
@@ -30,17 +30,17 @@ export async function Schema(data: FrogSchema) {
       }
 
       if (found) {
-        results.push(obj)
+        results.push(obj);
       }
     }
 
     // Return the results
-    return results as any
+    return results as any;
   };
 
   const insert = async <T>(document: any): Promise<T> => {
     const id = CreateDocumentId();
-    const schemaPath = `./db/${data.name}`;    
+    const schemaPath = `./db/${data.name}`;
 
     const constructedDocument = {
       id,
@@ -55,31 +55,54 @@ export async function Schema(data: FrogSchema) {
         throw new Error(`Field ${key} is not in the schema`);
       }
 
-      if (data.fields.find((field) => field.name === key && field.required) && !constructedDocument[key]) {
+      if (
+        data.fields.find((field) => field.name === key && field.required) &&
+        !constructedDocument[key]
+      ) {
         throw new Error(`Field ${key} is required`);
       }
     }
 
     // Loop through fieldsnt
     for (const field of data.fields) {
-      // Check types
-      if (typeof constructedDocument[field.name] !== field.type) {
-        throw new Error(`Field ${field.name} must be of type ${field.type}`);
+      const isADateType = field.type === FrogFieldType.Date;
+      const isAObjectType = field.type === FrogFieldType.Object;
+      const isAArrayType = field.type === FrogFieldType.Array;
+
+      if (isADateType) {
+        if (!(constructedDocument[field.name] instanceof Date)) {
+          throw new Error(`Field ${field.name} must be of type ${field.type}`);
+        }
+      } else if (isAObjectType) {
+        if (typeof constructedDocument[field.name] !== "object") {
+          throw new Error(`Field ${field.name} must be of type ${field.type}`);
+        }
+      } else if (isAArrayType) {
+        if (!Array.isArray(constructedDocument[field.name])) {
+          throw new Error(`Field ${field.name} must be of type ${field.type}`);
+        }
+      } else {
+        if (typeof constructedDocument[field.name] !== field.type) {
+          throw new Error(`Field ${field.name} must be of type ${field.type}`);
+        }
       }
     }
 
     // Write to file
-    fs.writeFileSync(`${schemaPath}/${id}.json`, JSON.stringify(constructedDocument, null, 2));
+    fs.writeFileSync(
+      `${schemaPath}/${id}.json`,
+      JSON.stringify(constructedDocument, null, 2)
+    );
 
     // Return the document
     return constructedDocument;
-  }
+  };
 
   const findOne = async <T>(query: any): Promise<T> => {
     const results = await find(query);
     // @ts-ignore
     return results[0] as T;
-  }
+  };
 
   const deleteOne = async (id: string) => {
     const exist = await findOne({ id });
@@ -89,11 +112,11 @@ export async function Schema(data: FrogSchema) {
     }
 
     const schemaPath = `./db/${data.name}`;
-   
+
     fs.unlinkSync(`${schemaPath}/${id}.json`);
 
     return exist;
-  }
+  };
 
   const deleteAll = async <T>(query: any): Promise<T[]> => {
     const results = await find(query);
@@ -103,7 +126,7 @@ export async function Schema(data: FrogSchema) {
     }
 
     return results as T[];
-  }
+  };
 
   const update = async <T>(id: string, document: any): Promise<T> => {
     const exist = await findOne({ id });
@@ -136,11 +159,14 @@ export async function Schema(data: FrogSchema) {
     }
 
     // Write to file
-    fs.writeFileSync(`${schemaPath}/${id}.json`, JSON.stringify(constructedDocument, null, 2));
+    fs.writeFileSync(
+      `${schemaPath}/${id}.json`,
+      JSON.stringify(constructedDocument, null, 2)
+    );
 
     // Return the document
     return constructedDocument;
-  }
+  };
 
   return {
     ...data,
@@ -150,7 +176,7 @@ export async function Schema(data: FrogSchema) {
     deleteOne,
     deleteAll,
     update,
-  }
+  };
 }
 
 export function FrogDB() {
@@ -184,7 +210,7 @@ export function FrogDB() {
 
         // Create types for the schema
         const types: string[] = [];
-    
+
         // Push the fields to the types array
         for (const field of schema.fields) {
           types.push(`${field.name}: ${formatType(field)};`);
@@ -197,17 +223,20 @@ export function FrogDB() {
 
         // Create the types file
         const typesPath = `${path}/types/${schema.name}.ts`;
-        fs.writeFileSync(typesPath, `export type ${schema.name} = { id: string; ${types.join(" ")} };`);
+        fs.writeFileSync(
+          typesPath,
+          `export type ${schema.name} = { id: string; ${types.join(" ")} };`
+        );
 
         // Create the schema file
         if (!fs.existsSync(schemaPath)) {
           fs.mkdirSync(schemaPath);
-        } 
+        }
       }
       return db;
-    }
+    },
   };
 }
 
-export { FrogFieldType, formatType }
+export { FrogFieldType, formatType };
 export type { FrogSchema, FrogField };

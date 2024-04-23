@@ -1,11 +1,7 @@
 import { type FrogSchema, type FrogField, FrogFieldType } from "./types";
-import crypto from "crypto";
-import fs from "fs";
 import { formatType } from "./helpers/format";
-
-function CreateDocumentId() {
-  return crypto.randomBytes(16).toString("hex");
-}
+import { CreateDocumentId } from "./helpers/createId";
+import fs from "fs";
 
 export async function Schema(data: FrogSchema) {
   const find = async <T>(query: any): Promise<T> => {

@@ -1,7 +1,13 @@
-import { type FrogSchema, type FrogField, FrogFieldType } from "./types";
+import {
+  type FrogSchema,
+  type FrogField,
+  FrogFieldType,
+  type FrogDbOptions,
+} from "./types";
 import { formatType } from "./helpers/format";
 import { CreateDocumentId } from "./helpers/createId";
 import fs from "fs";
+import fetcher from "./helpers/basicAuth";
 
 export async function Schema(data: FrogSchema) {
   const find = async <T>(query: any): Promise<T> => {
@@ -175,10 +181,12 @@ export async function Schema(data: FrogSchema) {
   };
 }
 
-export function FrogDB() {
+export function FrogDB(options?: FrogDbOptions) {
   let path = "./db";
   return {
     async generate(schemas: FrogSchema[]) {
+      const isSererMode = options?.server;
+
       const db: any = {};
 
       // Check if the path exists, if not create it
@@ -186,50 +194,82 @@ export function FrogDB() {
         fs.mkdirSync(path);
       }
 
-      for (const schema of schemas) {
-        // Create a folder for each schema
-        const schemaPath = `${path}/${schema.name}`;
+      if (!isSererMode) {
+        for (const schema of schemas) {
+          // Create a folder for each schema
+          const schemaPath = `${path}/${schema.name}`;
 
-        // Check if schema has an id field
-        if (schema.fields.find((field) => field.name === "id")) {
-          throw new Error("Schema cannot have a field named 'id'");
+          // Check if schema has an id field
+          if (schema.fields.find((field) => field.name === "id")) {
+            throw new Error("Schema cannot have a field named 'id'");
+          }
+
+          // Check if there are duplicate fields
+          const fieldNames = schema.fields.map((field) => field.name);
+          const uniqueFieldNames = new Set(fieldNames);
+
+          // Check if fields are unique
+          if (fieldNames.length !== uniqueFieldNames.size) {
+            throw new Error("Fields must be unique");
+          }
+
+          // Create types for the schema
+          const types: string[] = [];
+
+          // Push the fields to the types array
+          for (const field of schema.fields) {
+            types.push(`${field.name}: ${formatType(field)};`);
+          }
+
+          // Check if the types folder exists, if not create it
+          if (!fs.existsSync(`${path}/types`)) {
+            fs.mkdirSync(`${path}/types`);
+          }
+
+          // Create the types file
+          const typesPath = `${path}/types/${schema.name}.ts`;
+          fs.writeFileSync(
+            typesPath,
+            `export type ${schema.name} = { id: string; ${types.join(" ")} };`
+          );
+
+          console.log(schema);
+
+          // Create the schema file
+          if (!fs.existsSync(schemaPath)) {
+            fs.mkdirSync(schemaPath);
+          }
         }
-
-        // Check if there are duplicate fields
-        const fieldNames = schema.fields.map((field) => field.name);
-        const uniqueFieldNames = new Set(fieldNames);
-
-        // Check if fields are unique
-        if (fieldNames.length !== uniqueFieldNames.size) {
-          throw new Error("Fields must be unique");
-        }
-
-        // Create types for the schema
-        const types: string[] = [];
-
-        // Push the fields to the types array
-        for (const field of schema.fields) {
-          types.push(`${field.name}: ${formatType(field)};`);
-        }
-
-        // Check if the types folder exists, if not create it
-        if (!fs.existsSync(`${path}/types`)) {
-          fs.mkdirSync(`${path}/types`);
-        }
-
-        // Create the types file
-        const typesPath = `${path}/types/${schema.name}.ts`;
-        fs.writeFileSync(
-          typesPath,
-          `export type ${schema.name} = { id: string; ${types.join(" ")} };`
+        return db;
+      } else {
+        const res = await fetcher(
+          `${options.server?.host}:${options.server?.port}/ping`,
+          options.server?.auth.user as string,
+          options.server?.auth.password as string
         );
 
-        // Create the schema file
-        if (!fs.existsSync(schemaPath)) {
-          fs.mkdirSync(schemaPath);
+        if (!res.ok) {
+          throw new Error(`${res.status} - ${res.statusText}`);
         }
+
+        for (const schema of schemas) {
+          const created = await fetcher(
+            `${options.server?.host}:${options.server?.port}/schema`,
+            options.server?.auth.user as string,
+            options.server?.auth.password as string,
+            {
+              method: "POST",
+              body: JSON.stringify(schema),
+            }
+          );
+
+          if (!created.ok) {
+            throw new Error(`${created.status} - ${created.statusText}`);
+          }
+        }
+
+        return db;
       }
-      return db;
     },
   };
 }

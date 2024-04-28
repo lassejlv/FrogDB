@@ -10,6 +10,17 @@ export interface FrogField {
   required?: boolean;
 }
 
+export interface FrogDbOptions {
+  server?: {
+    host: string;
+    port: number;
+    auth: {
+      user: string;
+      password: string;
+    };
+  };
+}
+
 export enum FrogFieldType {
   String = "string",
   Number = "number",

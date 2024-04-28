@@ -20,6 +20,10 @@ app.use(
 
 app.route("/schema", SchemaRouter);
 
+app.get("/ping", (c) => {
+  return c.json({ message: "pong" });
+});
+
 // Check data path
 if (!fs.existsSync(env.DATA_PATH)) {
   fs.mkdirSync(env.DATA_PATH);

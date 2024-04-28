@@ -3,7 +3,9 @@
   "module": "src/index.ts",
   "type": "module",
   "scripts": {
-    "dev": "bun --watch ."
+    "dev": "bun --watch .",
+    "start": "bun run src/index.ts",
+    "compile": "bun build --compile --minify ./src/index.ts --outfile build/server"
   },
   "devDependencies": {
     "@types/bun": "latest"

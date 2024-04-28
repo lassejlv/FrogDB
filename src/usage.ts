@@ -17,4 +17,15 @@ const user = await UserSchema.insert<User>({
   ],
 });
 
-FrogDB().generate([UserSchema]);
+const db = FrogDB({
+  server: {
+    host: "http://localhost",
+    port: 8000,
+    auth: {
+      user: "admin",
+      password: "123456",
+    },
+  },
+});
+
+db.generate([UserSchema]);
